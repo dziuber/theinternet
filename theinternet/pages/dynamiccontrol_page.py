@@ -2,12 +2,11 @@ from page_objects import PageObject, PageElement
 from selenium import webdriver
 import time
 
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 from theinternet.config.config import explicit_timeout
-
 
 class DynamicControlPage(PageObject):
     # locators
@@ -16,6 +15,8 @@ class DynamicControlPage(PageObject):
     _message_loc = "message"
     _input_field_loc = "#input-example>input"
     _input_btn_loc = "#input-example > button"
+    _gone = '//p[contains(text(),"gone")]'
+    _back = '//p[contains(text(),"back")]'
 
     # elements
     checkbox_box = PageElement(css=_checbox_loc)
@@ -51,6 +52,14 @@ class DynamicControlPage(PageObject):
         print("Waiting")
         return w
 
+    def wait_for_element(self, locator):
+        try:
+            WebDriverWait(self.driver, 5
+                          ).until(ec.presence_of_element_located(
+                (By.XPATH, locator)))
+            return True
+        except NoSuchElementException:
+            return False
 
 
     def click_checkbox(self):
@@ -90,8 +99,7 @@ class DynamicControlPage(PageObject):
             print("Checkbox not present")
             return False
 
-
-    # def wait_checkbox_invisible(self):
+            # def wait_checkbox_invisible(self):
     #
     #     wait=WebDriverWait(self.driver,10)
     #     wait.until(ec.invisibility_of_element(self.checkbox_box))
@@ -108,20 +116,10 @@ class DynamicControlPage(PageObject):
     #         return False
 
     def assert_checkbox_dissappeared(self):
-        if self.is_checkbox_present() == False and self.return_message_txt() == "It's gone!":
-            # print(self.wait_checkbox_invisible())
-            # print(self.return_message_txt())
-            return True
-        else:
-            return False
+        return self.wait_for_element(self._gone)
 
     def assert_checkbox_appeared(self):
-        if self.is_checkbox_present() and self.return_message_txt() == "It's back!":
-            print(self.wait_checkbox_invisible())
-            print(self.return_message_txt())
-            return True
-        else:
-            return False
+        return self.wait_for_element(self._back)
 
     def assert_input_field_enabled(self):
         if self.input_field_enabled() and self.return_message_txt() == "It's enabled!":

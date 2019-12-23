@@ -13,6 +13,7 @@ def setup(request):
     print("Running method - setUp")
     chrome_options = Options()
     chrome_options.add_experimental_option("prefs", {"profile.default_content_setting_values.geolocation": 1})
+    chrome_options.add_experimental_option("useAutomationExtension", False);
     # chrome_options.add_argument('--headless')
     driver = webdriver.Chrome(executable_path=chromedriver_path,options=chrome_options)
     driver.maximize_window()
